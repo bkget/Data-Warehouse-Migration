@@ -1,8 +1,8 @@
 # Importing the necessary modules
-from asyncore import read
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.bash_operator import BashOperator
 from datetime import datetime as dt
 from datetime import timedelta
 from airflow import DAG 
@@ -90,11 +90,14 @@ def insert_data():
         },
     )
 
-# Dag creation
+####################################################
+#          Airflow DAG configurations              #
+####################################################
+
 with DAG(
-    dag_id='data_to_Postgres_loader_dag',
+    dag_id='ELT_DAG',
     default_args=default_args,
-    description='Upload data from CSV to Postgres',
+    description='Upload data from CSV to Postgres and Transform it with dbt',
     schedule_interval='@once',
     catchup=False
 ) as pg_dag:
@@ -125,9 +128,33 @@ with DAG(
     )
 
  data_loader = PythonOperator(
-        task_id="load_data",
-        python_callable=insert_data
-    )
+    task_id="load_data",
+    python_callable=insert_data
+ )
 
-# Task dependencies
-data_reader >> table_creator >> data_loader
+####################################################
+#          dbt Transformation                      #
+####################################################
+
+ DBT_PROJECT_DIR = "/opt/airflow/dbt"
+ dbt_run = BashOperator(
+    task_id="dbt_run",
+    bash_command=f"dbt run --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
+ )
+
+ dbt_test = BashOperator(
+    task_id="dbt_test",
+    bash_command=f"dbt test --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
+ )
+
+ dbt_doc_generate = BashOperator(
+    task_id="dbt_doc_generate", 
+    bash_command="dbt docs generate --profiles-dir /opt/airflow/dbt --project-dir "
+                    "/opt/airflow/dbt"
+ )
+
+    ####################################################
+    #          Task dependencies                       #
+    ####################################################
+
+data_reader >> table_creator >> data_loader  >> dbt_run >> dbt_test >> dbt_doc_generate
