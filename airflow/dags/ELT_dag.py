@@ -13,9 +13,9 @@ from sqlalchemy import Numeric
 default_args = {
     'owner': 'biruk',
     'depends_on_past': False,
-    'email': ['bkgetmom@gmail.com'],
-    'email_on_failure': True,
-    'email_on_retry': True,
+    # 'email': ['bkgetmom@gmail.com'],
+    # 'email_on_failure': True,
+    # 'email_on_retry': True,
     'retries': 1,
     'start_date': dt(2022, 7, 18),
     'retry_delay': timedelta(minutes=5)
@@ -94,67 +94,68 @@ def insert_data():
 #          Airflow DAG configurations              #
 ####################################################
 
-with DAG(
-    dag_id='ELT_DAG',
-    default_args=default_args,
-    description='Upload data from CSV to Postgres and Transform it with dbt',
-    schedule_interval='@once',
-    catchup=False
-) as pg_dag:
+# with DAG(
+#     dag_id='ELT_DAG',
+#     default_args=default_args,
+#     description='Upload data from CSV to Postgres and Transform it with dbt',
+#     schedule_interval='@once',
+#     catchup=False
+# ) as pg_dag:
  
- data_reader = PythonOperator(
-    task_id="read_data", 
-    python_callable=data_shape
-  )
+# #  data_reader = PythonOperator(
+# #     task_id="read_data", 
+# #     python_callable=data_shape
+# #   )
 
- table_creator = PostgresOperator(
-    task_id="create_table", 
-    postgres_conn_id="pg_server",
-    sql = '''
-        CREATE TABLE  IF NOT EXISTS traffic( 
-            id serial primary key,
-            track_id numeric, 
-            type text not null, 
-            traveled_d double precision DEFAULT NULL,
-            avg_speed double precision DEFAULT NULL, 
-            lat double precision DEFAULT NULL, 
-            lon double precision DEFAULT NULL, 
-            speed double precision DEFAULT NULL,    
-            lon_acc double precision DEFAULT NULL, 
-            lat_acc double precision DEFAULT NULL, 
-            time double precision DEFAULT NULL
-        );
-    '''
-    )
+#  table_creator = PostgresOperator(
+#     task_id="create_table", 
+#     postgres_conn_id="pg_server",
+#     sql = '''
+#         CREATE TABLE  IF NOT EXISTS traffic( 
+#             id serial primary key,
+#             track_id numeric, 
+#             type text not null, 
+#             traveled_d double precision DEFAULT NULL,
+#             avg_speed double precision DEFAULT NULL, 
+#             lat double precision DEFAULT NULL, 
+#             lon double precision DEFAULT NULL, 
+#             speed double precision DEFAULT NULL,    
+#             lon_acc double precision DEFAULT NULL, 
+#             lat_acc double precision DEFAULT NULL, 
+#             time double precision DEFAULT NULL
+#         );
+#     '''
+#     )
 
- data_loader = PythonOperator(
-    task_id="load_data",
-    python_callable=insert_data
- )
+#  data_loader = PythonOperator(
+#     task_id="load_data",
+#     python_callable=insert_data
+#  )
 
 ####################################################
 #          dbt Transformation                      #
 ####################################################
 
- DBT_PROJECT_DIR = "/opt/airflow/dbt"
- dbt_run = BashOperator(
-    task_id="dbt_run",
-    bash_command=f"dbt run --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
- )
+#  DBT_PROJECT_DIR = "/opt/airflow/dbt"
+#  dbt_run = BashOperator(
+#     task_id="dbt_run",
+#     bash_command=f"dbt run --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
+#  )
 
- dbt_test = BashOperator(
-    task_id="dbt_test",
-    bash_command=f"dbt test --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
- )
+#  dbt_test = BashOperator(
+#     task_id="dbt_test",
+#     bash_command=f"dbt test --profiles-dir {DBT_PROJECT_DIR} --project-dir {DBT_PROJECT_DIR}",
+#  )
 
- dbt_doc_generate = BashOperator(
-    task_id="dbt_doc_generate", 
-    bash_command="dbt docs generate --profiles-dir /opt/airflow/dbt --project-dir "
-                    "/opt/airflow/dbt"
- )
+#  dbt_doc_generate = BashOperator(
+#     task_id="dbt_doc_generate", 
+#     bash_command="dbt docs generate --profiles-dir /opt/airflow/dbt --project-dir "
+#                     "/opt/airflow/dbt"
+#  )
 
     ####################################################
     #          Task dependencies                       #
     ####################################################
 
-data_reader >> table_creator >> data_loader  >> dbt_run >> dbt_test >> dbt_doc_generate
+# data_reader >> table_creator >> data_loader  >> dbt_run >> dbt_test >> dbt_doc_generate
+# table_creator >> data_loader 
