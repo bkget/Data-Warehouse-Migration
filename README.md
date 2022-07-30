@@ -17,11 +17,6 @@
   <p align="center">
     A dockerized ELT pipeline.
     <br /><br />
-    <a href="https://traffic-doc.netlify.app/"><strong>Explore the docs »</strong></a>
-    <br /> 
-    <a href="https://github.com/bkget/Scalable-Data-Migration/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/bkget/Scalable-Data-Migration/issues">Request Feature</a>
   </p>
 </div>
 
@@ -60,8 +55,7 @@ Tech Stack used in this project includes:
 * [![Docker][Docker.com]][Docker-url]
 * [![Postgres][Postgresql.com]][Postgresql-url]
 * [![Airflow][Airflow.com]][Airflow-url]
-* [![DBT][DBT.com]][DBT-url]
-* [![Superset][Superset.com]][Superset-url]
+* [![DBT][DBT.com]][DBT-url] 
 
 <!-- GETTING STARTED -->
 ## Getting Started
