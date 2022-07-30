@@ -8,18 +8,6 @@
  
 
 <div id="top"></div>
-
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <h3 align="center">Data Warehousing</h3>
-
-  <p align="center">
-    A dockerized ELT pipeline.
-    <br /><br />
-  </p>
-</div>
-
 <!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
