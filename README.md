@@ -1,4 +1,4 @@
-# Data-Warehousing with Postgres, DBT, and Airflow
+# Scalable Data Migration from PostgreSQL to MySQL Database
 <!-- PROJECT SHIELDS -->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
@@ -19,9 +19,9 @@
     <br /><br />
     <a href="https://traffic-doc.netlify.app/"><strong>Explore the docs »</strong></a>
     <br /> 
-    <a href="https://github.com/bkget/Data-Warehousing/issues">Report Bug</a>
+    <a href="https://github.com/bkget/Scalable-Data-Migration/issues">Report Bug</a>
     ·
-    <a href="https://github.com/bkget/Data-Warehousing/issues">Request Feature</a>
+    <a href="https://github.com/bkget/Scalable-Data-Migration/issues">Request Feature</a>
   </p>
 </div>
 
@@ -51,7 +51,7 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-![alt text](https://github.com/bkget/Data-Warehousing/blob/main/screenshots/Architectural_diagram.png?raw=true)
+![alt text](https://github.com/bkget/Scalable-Data-Migration/blob/main/screenshots/migration_architecture.png?raw=true)
 A dockerized Extract, Load, Transform (ELT) pipeline with PostgreSQL, Airflow, DBT, and a Redash.
 
 ### Built With
@@ -74,11 +74,11 @@ Make sure you have docker installed on local machine.
 
 1. Clone the repo
     ```sh
-    git clone https://https://github.com/bkget/Data-Warehousing.git
+    git clone https://https://github.com/bkget/Scalable-Data-Migration.git
     ```
 2. Navigate to the folder
     ```sh
-    cd Data-Warehousing
+    cd Scalable-Data-Migration
     ```
 3. Build an airflow image
     ```sh
@@ -121,16 +121,16 @@ Biruk Getaneh - bkgetmom@gmail.com
 -   [10 Academy](https://www.10academy.org/)
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/bkget/Data-Warehousing.svg?style=for-the-badge
-[contributors-url]: https://github.com/bkget/Data-Warehousing/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/bkget/Data-Warehousing?style=for-the-badge
-[forks-url]: https://github.com/bkget/Data-Warehousing?style=for-the-badge
-[stars-shield]: https://img.shields.io/github/stars/bkget/Data-Warehousing?style=for-the-badge
-[stars-url]: https://github.com/bkget/Data-Warehousing/stargazers
+[contributors-shield]: https://img.shields.io/github/contributors/bkget/Scalable-Data-Migration.svg?style=for-the-badge
+[contributors-url]: https://github.com/bkget/Scalable-Data-Migration/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/bkget/Scalable-Data-Migration?style=for-the-badge
+[forks-url]: https://github.com/bkget/Scalable-Data-Migration?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/bkget/Scalable-Data-Migration?style=for-the-badge
+[stars-url]: https://github.com/bkget/Scalable-Data-Migration/stargazers
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/bkget/Data-Warehousing/issues?style=for-the-badge
-[license-shield]: https://img.shields.io/github/license/bkget/Data-Warehousing?style=for-the-badge
-[license-url]: https://github.com/bkget/Data-Warehousing/blob/main/LICENSE
+[issues-url]: https://github.com/bkget/Scalable-Data-Migration/issues?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/bkget/Scalable-Data-Migration?style=for-the-badge
+[license-url]: https://github.com/bkget/Scalable-Data-Migration/blob/main/LICENSE
 [Postgresql.com]: https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white
 [Postgresql-url]: https://www.postgresql.org/
 [Airflow.com]: https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white
