@@ -3,3 +3,7 @@ COPY requirements.txt /requirements.txt
 RUN pip install --user --upgrade pip
 RUN pip install --no-cache-dir --user -r /requirements.txt
 RUN pip install redash_toolbelt
+RUN pip install SQLAlchemy
+RUN pip install apache-airflow-providers-mysql
+# RUN pip install dbt-mysql
+# RUN pip install mysql-connector-python

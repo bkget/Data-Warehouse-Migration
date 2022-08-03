@@ -1,52 +1,7 @@
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
-
-# Basic Airflow cluster configuration for CeleryExecutor with Redis and PostgreSQL.
-#
-# WARNING: This configuration is for local development. Do not use it in a production deployment.
-#
-# This configuration supports basic configuration using environment variables or an .env file
-# The following variables are supported:
-#
-# AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:2.3.3
-# AIRFLOW_UID                  - User ID in Airflow containers
-#                                Default: 50000
-# Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
-#
-# _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
-#                                Default: airflow
-# _AIRFLOW_WWW_USER_PASSWORD   - Password for the administrator account (if requested).
-#                                Default: airflow
-# _PIP_ADDITIONAL_REQUIREMENTS - Additional PIP requirements to add when starting all containers.
-#                                Default: ''
-#
-# Feel free to modify this file to suit your needs.
----
 version: '3'
 x-airflow-common:
   &airflow-common
-  # In order to add custom dependencies or upgrade provider packages you can use your extended image.
-  # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
-  # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  # image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:latest}
-  image: ${AIRFLOW_IMAGE_NAME:-dbt/airflow:2.3.3}
-
+  image: ${AIRFLOW_IMAGE_NAME:-custom_build:latest}
   # build: .
   environment:
     &airflow-common-env
@@ -59,7 +14,6 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
-
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
@@ -76,20 +30,38 @@ x-airflow-common:
 x-redash-service: &redash-service
   image: redash/redash:latest
   depends_on:
-  - postgres
-  - redis
+    - postgres
+    - redis
   env_file: .env
   restart: always
 
+x-superset-image: &superset-image apache/superset:${TAG:-latest-dev}
+x-superset-depends-on: &superset-depends-on
+  - postgres
+  - redis
+x-superset-volumes: &superset-volumes
+  # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
+    - ../superset:/app/docker
+    - superset_home:/app/superset_home
+
 services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    tty: true
+    ports:
+      - 3309:3306
+    volumes:
+      - mysql-db-volume:/var/lib/mysql
+    env_file:
+      - .env
+
   postgres:
     image: postgres:13
-    environment:
-      env_file: .env
-
+    env_file:
+      - .env
     ports:
       - 5432:5432
-
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
@@ -102,9 +74,9 @@ services:
     <<: *airflow-common
     command: webserver
     ports:
-      - 8088:8080
+      - 8080:8080
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8085/health"]
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -128,7 +100,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
- 
   airflow-triggerer:
     <<: *airflow-common
     command: triggerer
@@ -235,30 +206,34 @@ services:
       - airflow
 
   server:
-      <<: *redash-service
-      command: server
-      ports:
-        - 5001:5000
-      environment:
-        REDASH_WEB_WORKERS: 4
+    <<: *redash-service
+    command: server
+    ports:
+      - 5000:5000
+    environment:
+      REDASH_WEB_WORKERS: 4
+
   scheduler:
     <<: *redash-service
     command: scheduler
     environment:
       QUEUES: "celery"
       WORKERS_COUNT: 1
+
   scheduled_worker:
     <<: *redash-service
     command: worker
     environment:
       QUEUES: "scheduled_queries,schemas"
       WORKERS_COUNT: 1
+
   adhoc_worker:
     <<: *redash-service
     command: worker
     environment:
       QUEUES: "queries"
       WORKERS_COUNT: 2
+
   redis:
     image: redis:latest
     restart: always
@@ -273,5 +248,48 @@ services:
   #     - server:redash
   #   restart: always
 
+  superset:
+    env_file: .env
+    image: *superset-image
+    container_name: superset_app
+    command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
+    user: "root"
+    restart: unless-stopped
+    ports:
+        - "8088:8088"
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+
+  superset-init:
+    image: *superset-image
+    container_name: superset_init
+    command: ["/app/docker/docker-init.sh"]
+    env_file: .env
+    depends_on: *superset-depends-on
+    user: "root"
+    volumes: *superset-volumes
+
+  superset-worker:
+    image: *superset-image
+    container_name: superset_worker
+    command: ["/app/docker/docker-bootstrap.sh", "worker"]
+    env_file: .env
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    user: "root"
+    volumes: *superset-volumes
+
+  superset-worker-beat:
+    image: *superset-image
+    container_name: superset_worker_beat
+    command: ["/app/docker/docker-bootstrap.sh", "beat"]
+    env_file: .env
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    user: "root"
+    volumes: *superset-volumes
+
 volumes:
   postgres-db-volume:
+  mysql-db-volume:
+  superset_home:

@@ -1,4 +1,5 @@
-use pneuma;
+-- CREATE database IF NOT EXISTS pneuma;
+-- use pneuma;
 CREATE TABLE  IF NOT EXISTS traffic( 
     id INT PRIMARY KEY,
     track_id INT NOT NULL, 
