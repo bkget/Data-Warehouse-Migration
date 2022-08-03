@@ -7,6 +7,6 @@ postgres_new:
       user: airflow
       pass: airflow
       port: 5432
-      dbname: pneuma
+      dbname: airflow
       schema: public
       threads: 4
